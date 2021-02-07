@@ -9,8 +9,8 @@ function Arcalive(username, password) {
     this._article = await Arca.Article.fromUrl('https://sm.arca.live/b/smpeople/20309237', this._session);
   }.bind(this))()
   .then(() => {
-    this._lastArticleId = null;
     this._lastCommentId = null;
+    this._checkedArticles = [];
 
     this._checkNoti();
     this._checkClaim();
@@ -68,13 +68,17 @@ Arcalive.prototype._checkAggro = async function() {
         })
       });
 
-    const newArticles = articles.filter(article => article.articleId > this._lastArticleId);
-    const aggroArticles = newArticles.filter(article => article.rateDiff <= -5);
+    const aggroArticles = articles.filter(article => article.rateDiff <= -5);
+    const newAggroArticles = aggroArticles.filter(article => this._checkedArticles.indexOf(article.articleId) === -1);
 
     if(this._lastArticleId !== null) {
-      aggroArticles.forEach(aggroArticle => this._dispatch('aggro', aggroArticle));
+      newAggroArticles.forEach(aggroArticle => {
+        this._checkedArticles.push(aggroArticle.articleId);
+        this._dispatch('aggro', aggroArticle);
+      });
     }
-    this._lastArticleId = articles[0].articleId;
+    
+    this._checkedArticles = this._checkedArticles.slice(this._checkedArticles.length - 30, this._checkedArticles.length);
   } catch(err) {
     console.error(err);
   }
