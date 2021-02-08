@@ -113,9 +113,10 @@ Article.prototype.delete = async function() {
   }
 
   return await this._session._fetch(`${this._boardUrl}/${this.articleId}/delete`, {
-    method: POST,
+    method: 'POST',
     body: body,
-    csrfRequired: true
+    csrfRequired: true,
+    parse: false
   });
 }
 

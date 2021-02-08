@@ -3,18 +3,21 @@ const Arca = require('./libs/arcalive.js');
 function Arcalive(username, password) {
   this._session = new Arca.Session(username, password);
   this._listeners = {};
+  this._autoDelete = [];
 
   (async function() {
     this._board = await this._session.getBoard('smpeople');
+    this._board._boardUrl = 'https://sm.arca.live/b/smpeople';
     this._article = await Arca.Article.fromUrl('https://sm.arca.live/b/smpeople/20309237', this._session);
   }.bind(this))()
   .then(() => {
-    this._lastCommentId = null;
-    this._checkedArticles = [];
+    this._lastArticleId = -1;
+    this._lastCommentId = -1;
+    this._checkedAggro = [];
 
     this._checkNoti();
     this._checkClaim();
-    this._checkAggro();
+    this._checkArticles();
   });
 }
 
@@ -46,7 +49,7 @@ Arcalive.prototype._checkClaim = async function() {
       return claim.commentId > this._lastCommentId
     });
     
-    if(this._lastCommentId !== null) {
+    if(this._lastCommentId !== -1) {
       newClaims.forEach(claim => this._dispatch('claim', claim));
     }
     this._lastCommentId = currentLast;
@@ -57,33 +60,38 @@ Arcalive.prototype._checkClaim = async function() {
   setTimeout(this._checkClaim.bind(this), 10000);
 }
 
-Arcalive.prototype._checkAggro = async function() {
+Arcalive.prototype._checkArticles = async function() {
   try {
-    const articles = await this._board.readPage(1)
-      .then(articles => {
-        return articles.map(article => {
-          const data = {...article._articleData};
-          data.url = article._articleUrl;
-          return data;
-        })
-      });
+    const articles = await this._board.readPage(1);
 
-    const aggroArticles = articles.filter(article => article.rateDiff <= -5);
-    const newAggroArticles = aggroArticles.filter(article => this._checkedArticles.indexOf(article.articleId) === -1);
+    const aggroArticles = articles.filter(article => article._articleData.rateDiff <= -5);
+    const newAggroArticles = aggroArticles.filter(article => this._checkedAggro.indexOf(article.articleId) === -1);
 
-    if(this._lastArticleId !== null) {
-      newAggroArticles.forEach(aggroArticle => {
-        this._checkedArticles.push(aggroArticle.articleId);
-        this._dispatch('aggro', aggroArticle);
+    const newArticles = articles.filter(article => article.articleId > this._lastArticleId);
+
+    newAggroArticles.forEach(aggroArticle => {
+      this._checkedAggro.push(aggroArticle.articleId);
+      this._dispatch('aggro', aggroArticle);
+    });
+
+    if(this._lastArticleId) {
+      newArticles.forEach(async (article) => {
+        const data = await article.read();
+        if(this._autoDelete.some(deleteRule => {
+          return deleteRule.pattern.exec(data.title) || deleteRule.pattern.exec(data.content);
+        })) {
+          this._dispatch('delete', article);
+        }
       });
     }
-    
-    this._checkedArticles = this._checkedArticles.slice(this._checkedArticles.length - 30, this._checkedArticles.length);
+
+    this._lastArticleId = articles[0].articleId;
+    this._checkedAggro = this._checkedAggro.slice(this._checkedAggro.length - 30, this._checkedAggro.length);
   } catch(err) {
     console.error(err);
   }
 
-  setTimeout(this._checkAggro.bind(this), 10000);
+  setTimeout(this._checkArticles.bind(this), 10000);
 };
 
 Arcalive.prototype._dispatch = function(msg, args) {
@@ -94,6 +102,16 @@ Arcalive.prototype.on = function(msg, listener) {
   this._listeners[msg] = this._listeners[msg] || [];
 
   this._listeners[msg].push(listener);
+}
+
+Arcalive.prototype.autoDelete = function(option = {
+  word: ''
+}) {
+  this._autoDelete.push(option);
+}
+
+Arcalive.prototype.deleteArticle = function(articleUrl) {
+  Arca.Article.fromUrl(articleUrl, this._session).delete().then(console.log).catch(console.log);
 }
 
 Arcalive.prototype.blockArticle = function(articleUrl, duration) {

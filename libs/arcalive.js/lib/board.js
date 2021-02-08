@@ -5,7 +5,6 @@ const Article = require('./article');
 function Board(session, boardUrl) {
   this._session = session;
   this._boardUrl = boardUrl;
-  this._hostUrl = 'https://' + new url.URL(boardUrl).host;
 
   this._cachedArticles = {};
 }

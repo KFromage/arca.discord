@@ -110,13 +110,19 @@ RequestSession.prototype._fetch = async function(resource, init = {}) {
   const parse = (init.parse === undefined) ? true : init.parse;
   const csrfRequired = init.csrfRequired || false;
 
+  delete init.csrfRequired;
+  delete init.parse;
+
   if(csrfRequired) {
-    const csrfToken = this._getCSRFToken(resource);
+    const csrfToken = await this._getCSRFToken(resource);
     
-    init.body = new url.URLSearchParams() || init.body;
+    init.body = init.body || new url.URLSearchParams();
     init.body.append('_csrf', csrfToken);
 
     init.headers.referer = init.headers.referer || resource;
+    init.headers.Cookie = this._makeCookieString();
+
+    console.log(resource, init);
   }
 
   let response = await fq.fetch(resource, init);
@@ -125,9 +131,6 @@ RequestSession.prototype._fetch = async function(resource, init = {}) {
     response = await fq.fetch(resource, init);
   }
 
-  if(300 <= response.status  && response.status < 400) {
-    response = await fq.fetch('https:' + response.headers.get('Location'), init);
-  }
   if(response.status >= 400) {
     throw new Error(`HTTP ${response.status}: ${resource}`);
   }

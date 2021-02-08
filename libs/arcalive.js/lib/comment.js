@@ -19,7 +19,7 @@ Comment.prototype.delete = async function() {
   }
 
   return await this._session._fetch(`${this._commentApiUrl}/delete`, {
-    method: POST,
+    method: 'POST',
     body: body,
     csrfRequired: true
   });
@@ -38,7 +38,7 @@ Comment.prototype.edit = async function(content) {
   body.append('content', content);
 
   return await this._session._fetch(`${this._commentApiUrl}/edit`, {
-    method: POST,
+    method: 'POST',
     headers: { referer: `${this._article._articleUrl}` },
     body: body
   });
