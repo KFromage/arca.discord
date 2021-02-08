@@ -172,7 +172,7 @@ Article.prototype.blockUser = async function(duration) {
   const body = new url.URLSearchParams();
   body.append('until', duration);
 
-  return await this._session._fetch(`${this._boardUrl}/block/article/${this._articleUrl}`, {
+  return await this._session._fetch(`${this._boardUrl}/block/article/${this._articleId}`, {
     method: 'POST',
     headers: { referer: this._articleUrl },
     body: body
