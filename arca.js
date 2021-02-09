@@ -92,7 +92,7 @@ Arcalive.prototype._checkArticles = async function() {
         if(this._autoDelete.some(deleteRule => {
           return deleteRule.pattern.exec(data.title) || deleteRule.pattern.exec(data.content);
         })) {
-          this._dispatch('delete', [ article ]);
+          this._dispatch(deleteRule.event, [ article ]);
         }
       });
     }
