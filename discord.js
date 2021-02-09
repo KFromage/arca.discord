@@ -58,11 +58,11 @@ DiscordBot.prototype._initClient = function() {
   this._client.on('messageReactionAdd', (reaction, user) => {
     if(reaction.message.author.id !== this._client.user.id) return;
     if(!reaction.message.guild.member(user).roles.cache.find(role => role.name === '관리자')) return;
-    
+
     if(reaction.count >= 1 && reaction.emoji.name === 'release') {
       this._dispatch('release', [ reaction.message.embeds[0] ]);
     }
-    if(reaction.count >= 3) {
+    if(reaction.count >= 3 && reaction.emoji.name.indexOf('ban') !== -1) {
       this._dispatch('strikeOut', [ +reaction.emoji.name.match(/(\d+)ban/)[1], reaction.message.embeds[0] ]);
     }
   });
@@ -71,7 +71,7 @@ DiscordBot.prototype._initClient = function() {
 }
 
 DiscordBot.prototype._dispatch = function(msg, args) {
-  this._listeners[msg].forEach(listener => listener.call(null, args));
+  this._listeners[msg].forEach(listener => listener.apply(null, args));
 }
 
 DiscordBot.prototype.on = function(msg, listener) {

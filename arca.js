@@ -71,19 +71,19 @@ Arcalive.prototype._checkArticles = async function() {
     const aggroArticles = articles.filter(article => article._articleData.rateDiff <= this._aggroCount);
     const newAggroArticles = aggroArticles.filter(article => this._checkedAggro.indexOf(article.articleId) === -1);
 
-    const quarantineArticles = articles.filter(article => article._articleData.rateDiff <= this._aggroCount);
-    const newQuarantineArticles = aggroArticles.filter(article => this._checkedAggro.indexOf(article.articleId) === -1);
+    const quarantineArticles = articles.filter(article => article._articleData.rateDiff <= this._quarantineCount);
+    const newQuarantineArticles = quarantineArticles.filter(article => this._checkedQuarantine.indexOf(article.articleId) === -1);
 
     const newArticles = articles.filter(article => article.articleId > this._lastArticleId);
 
     newAggroArticles.forEach(aggroArticle => {
       this._checkedAggro.push(aggroArticle.articleId);
-      this._dispatch('aggro', aggroArticle);
+      this._dispatch('aggro', [ aggroArticle ]);
     });
 
     newQuarantineArticles.forEach(quarantineArticle => {
       this._checkedQuarantine.push(quarantineArticle.articleId);
-      this._dispatch('quarantine', quarantineArticle);
+      this._dispatch('quarantine', [ quarantineArticle ]);
     })
 
     if(this._lastArticleId) {
@@ -92,7 +92,7 @@ Arcalive.prototype._checkArticles = async function() {
         if(this._autoDelete.some(deleteRule => {
           return deleteRule.pattern.exec(data.title) || deleteRule.pattern.exec(data.content);
         })) {
-          this._dispatch('delete', article);
+          this._dispatch('delete', [ article ]);
         }
       });
     }
@@ -108,7 +108,7 @@ Arcalive.prototype._checkArticles = async function() {
 };
 
 Arcalive.prototype._dispatch = function(msg, args) {
-  this._listeners[msg].forEach(listener => listener.call(null, args));
+  this._listeners[msg].forEach(listener => listener.apply(null, args));
 }
 
 Arcalive.prototype.on = function(msg, listener) {
@@ -150,7 +150,7 @@ Arcalive.prototype.blockArticle = function(articleUrl, duration) {
 
 Arcalive.prototype.quarantineArticle = function(articleUrl) {
   this._session.fromUrl(articleUrl).edit({
-    category: '격리'
+    category: '실황'
   });
 }
 
