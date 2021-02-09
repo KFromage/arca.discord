@@ -31,7 +31,7 @@ arca.on('claim', function(claimComment) {
   bot.sendMessage({embed: {
     color: '#00ff00',
     title: '새 신문고 댓글',
-    url: claimComment._commentUrl,
+    url: claimComment.url,
     description: '새 신문고 댓글이 등록되었습니다.',
     fields: [{
       name: claimComment._commentData.textContent.slice(0, 100) + (claimComment._commentData.textContent.length > 100 ? '...' : ''),
