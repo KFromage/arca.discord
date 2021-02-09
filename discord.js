@@ -45,12 +45,12 @@ DiscordBot.prototype._initClient = function() {
     }
 
     if(msg.content.indexOf('$redact') !== -1) {
-      const pattern = msg.content.split(/ /)[1];
+      const pattern = msg.content.split(/ /).slice(1).join(' ');
       this._dispatch('redact', [ pattern ]);
     }
 
     if(msg.content.indexOf('$noredact') !== -1) {
-      const pattern = msg.content.split(/ /)[1];
+      const pattern = msg.content.split(/ /).slice(1).join(' ');
       this._dispatch('noredact', [ pattern ]);
     }
   });
