@@ -1,4 +1,4 @@
-const Arca = require('arcalive.js');
+const Arca = require('./lib/arcalive.js');
 
 function Arcalive(username, password) {
   this._session = new Arca.Session(username, password);
@@ -89,11 +89,11 @@ Arcalive.prototype._checkArticles = async function() {
     if(this._lastArticleId) {
       newArticles.forEach(async (article) => {
         const data = await article.read({ noCache: false, withComments: false });
-        if(this._autoDelete.some(deleteRule => {
-          return deleteRule.pattern.exec(data.title) || deleteRule.pattern.exec(data.content);
-        })) {
-          this._dispatch(deleteRule.event, [ article ]);
-        }
+        this._autoDelete.forEach(deleteRule => {
+          if(deleteRule.pattern.exec(data.title) || deleteRule.pattern.exec(data.content)) {
+            this._dispatch(deleteRule.event, [ article ]);
+          }
+        });
       });
     }
 
