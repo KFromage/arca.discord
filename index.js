@@ -129,7 +129,7 @@ bot.on('redact', function(banPattern) {
     timestamp: new Date()
   }});
 
-  arca.redact({
+  arca.watch({
     pattern: new RegExp(banPattern),
     event: 'redact'
   });
@@ -147,7 +147,7 @@ bot.on('noredact', function(banPattern) {
     timestamp: new Date()
   }});
 
-  arca.cancelRedact({
+  arca.cancelWatch({
     pattern: new RegExp(banPattern),
     event: 'redact'
   });
