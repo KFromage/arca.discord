@@ -35,7 +35,7 @@ Arcalive.prototype._checkNoti = async function() {
         const notification = smNotification[i];
         await this._session._fetch('https://sm.arca.live' + notification.link);
       }
-      this._dispatch('notification', smNotification);
+      this._dispatch('notification', [ smNotification ]);
     }
   } catch(err) {
     console.error(err);
@@ -54,7 +54,7 @@ Arcalive.prototype._checkClaim = async function() {
     });
     
     if(this._lastCommentId !== -1) {
-      newClaims.forEach(claim => this._dispatch('claim', claim));
+      newClaims.forEach(claim => this._dispatch('claim', [ claim ]));
     }
     this._lastCommentId = currentLast;
   } catch(err) {
