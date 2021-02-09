@@ -1,19 +1,23 @@
-const Arca = require('./libs/arcalive.js');
+const Arca = require('arcalive.js');
 
 function Arcalive(username, password) {
   this._session = new Arca.Session(username, password);
   this._listeners = {};
   this._autoDelete = [];
 
+  this._aggroCount = -5;
+  this._quarantineCount = -10;
+
   (async function() {
     this._board = await this._session.getBoard('smpeople');
-    this._board._boardUrl = 'https://sm.arca.live/b/smpeople';
-    this._article = await Arca.Article.fromUrl('https://sm.arca.live/b/smpeople/20309237', this._session);
+    this._board.url = new URL('https://sm.arca.live/b/smpeople');
+    this._article = await this._session.fromUrl('https://sm.arca.live/b/smpeople/20309237', this._session);
   }.bind(this))()
   .then(() => {
     this._lastArticleId = -1;
     this._lastCommentId = -1;
     this._checkedAggro = [];
+    this._checkedQuarantine = [];
 
     this._checkNoti();
     this._checkClaim();
@@ -42,7 +46,7 @@ Arcalive.prototype._checkNoti = async function() {
 
 Arcalive.prototype._checkClaim = async function() {
   try {
-    const claims = await this._article.read(true, true).then(articleData => articleData.comments);
+    const claims = await this._article.read({ noCache: true, withComments: true }).then(articleData => articleData.comments);
     let currentLast = 0;
     const newClaims = claims.filter(claim => {
       currentLast = currentLast < claim.commentId ? claim.commentId : currentLast;
@@ -64,8 +68,11 @@ Arcalive.prototype._checkArticles = async function() {
   try {
     const articles = await this._board.readPage(1);
 
-    const aggroArticles = articles.filter(article => article._articleData.rateDiff <= -5);
+    const aggroArticles = articles.filter(article => article._articleData.rateDiff <= this._aggroCount);
     const newAggroArticles = aggroArticles.filter(article => this._checkedAggro.indexOf(article.articleId) === -1);
+
+    const quarantineArticles = articles.filter(article => article._articleData.rateDiff <= this._aggroCount);
+    const newQuarantineArticles = aggroArticles.filter(article => this._checkedAggro.indexOf(article.articleId) === -1);
 
     const newArticles = articles.filter(article => article.articleId > this._lastArticleId);
 
@@ -74,9 +81,14 @@ Arcalive.prototype._checkArticles = async function() {
       this._dispatch('aggro', aggroArticle);
     });
 
+    newQuarantineArticles.forEach(quarantineArticle => {
+      this._checkedQuarantine.push(quarantineArticle.articleId);
+      this._dispatch('quarantine', quarantineArticle);
+    })
+
     if(this._lastArticleId) {
       newArticles.forEach(async (article) => {
-        const data = await article.read();
+        const data = await article.read({ noCache: false, withComments: false });
         if(this._autoDelete.some(deleteRule => {
           return deleteRule.pattern.exec(data.title) || deleteRule.pattern.exec(data.content);
         })) {
@@ -87,6 +99,7 @@ Arcalive.prototype._checkArticles = async function() {
 
     this._lastArticleId = articles[0].articleId;
     this._checkedAggro = this._checkedAggro.slice(this._checkedAggro.length - 30, this._checkedAggro.length);
+    this._checkedQuarantine = this._checkedQuarantine.slice(this._checkedQuarantine.length - 30, this._checkedQuarantine.length);
   } catch(err) {
     console.error(err);
   }
@@ -104,18 +117,41 @@ Arcalive.prototype.on = function(msg, listener) {
   this._listeners[msg].push(listener);
 }
 
-Arcalive.prototype.autoDelete = function(option = {
-  word: ''
+Arcalive.prototype.setAggroCount = function(newCount) {
+  this._aggroCount = newCount;
+}
+
+Arcalive.prototype.setQuarantineCount = function(newCount) {
+  this._quarantineCount = newCount;
+}
+
+Arcalive.prototype.watch = function(option = {
+  word: '',
+  event: 'delete'
 }) {
   this._autoDelete.push(option);
 }
 
+Arcalive.prototype.cancelWatch = function(option = {
+  word: '',
+  event: 'delete'
+}) {
+  const index = this._autoDelete.findIndex(rule => (rule.word === option.word && rule.event === option.event));
+  this._autoDelete.splice(index, 1);
+}
+
 Arcalive.prototype.deleteArticle = function(articleUrl) {
-  Arca.Article.fromUrl(articleUrl, this._session).delete().then(console.log).catch(console.log);
+  this._session.fromUrl(articleUrl).delete();
 }
 
 Arcalive.prototype.blockArticle = function(articleUrl, duration) {
-  Arca.Article.fromUrl(articleUrl, this._session).blockUser(duration);
+  this._session.fromUrl(articleUrl).blockUser(duration);
+}
+
+Arcalive.prototype.quarantineArticle = function(articleUrl) {
+  this._session.fromUrl(articleUrl).edit({
+    category: '격리'
+  });
 }
 
 module.exports = Arcalive;
