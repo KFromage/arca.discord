@@ -156,9 +156,16 @@ Arcalive.prototype.cleanArticle = async function(articleUrl) {
   const article = this._session.fromUrl(articleUrl);
   const articleData = await article.read({ noCache: true, withComments: true});
 
-  articleData.comments.forEach(comment => {
-    article.deleteComment(comment.commentId);
-  });
+  Arca.FetchQueue.setRateLimit(1500);
+
+  for(let i = 0; i < articleData.comments.length; i++) {
+    const comment = articleData.comments[i];
+    if(!comment._commentData.deleted) {
+      await article.deleteComment(comment.commentId);
+    }
+  }
+
+  Arca.FetchQueue.setRateLimit(500);
 }
 
 Arcalive.prototype.quarantineArticle = async function(articleUrl) {
