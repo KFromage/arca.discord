@@ -35,23 +35,28 @@ DiscordBot.prototype._initClient = function() {
       }});
     }
 
-    if(msg.content.indexOf('$aggro') !== -1) {
+    if(msg.content.indexOf('$aggro') === 0) {
       const aggroCount = +msg.content.split(/ /)[1];
       this._dispatch('setaggro', [ aggroCount ]);
     }
-    if(msg.content.indexOf('$quarantine') !== -1) {
+    if(msg.content.indexOf('$quarantine') === 0) {
       const quarantineCount = +msg.content.split(/ /)[1];
       this._dispatch('setquarantine', [ quarantineCount ]);
     }
 
-    if(msg.content.indexOf('$redact') !== -1) {
+    if(msg.content.indexOf('$redact') === 0) {
       const pattern = msg.content.split(/ /).slice(1).join(' ');
       this._dispatch('redact', [ pattern ]);
     }
 
-    if(msg.content.indexOf('$noredact') !== -1) {
+    if(msg.content.indexOf('$noredact') === 0) {
       const pattern = msg.content.split(/ /).slice(1).join(' ');
       this._dispatch('noredact', [ pattern ]);
+    }
+
+    if(msg.content.indexOf('$clean') === 0) {
+      const cleanId = +msg.content.split(/ /)[1];
+      this._dispatch('cleancomment', [ cleanId ]);
     }
   });
   

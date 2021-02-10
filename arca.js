@@ -144,8 +144,21 @@ Arcalive.prototype.deleteArticle = function(articleUrl) {
   this._session.fromUrl(articleUrl).delete();
 }
 
+Arcalive.prototype.readArticle = function(articleUrl) {
+  return this._session.fromUrl(articleUrl).read({ noCache: true, withComments: false });
+}
+
 Arcalive.prototype.blockArticle = function(articleUrl, duration) {
   this._session.fromUrl(articleUrl).blockUser(duration);
+}
+
+Arcalive.prototype.cleanArticle = async function(articleUrl) {
+  const article = this._session.fromUrl(articleUrl);
+  const articleData = await article.read({ noCache: true, withComments: true});
+
+  articleData.comments.forEach(comment => {
+    article.deleteComment(comment.commentId);
+  });
 }
 
 Arcalive.prototype.quarantineArticle = async function(articleUrl) {

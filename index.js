@@ -179,6 +179,24 @@ bot.on('strikeOut', function(banDays, embed) {
   arca.blockArticle(embed.url, 3600 * 24 * banDays);
 });
 
+bot.on('cleancomment', async function(articleId) {
+  const articleData = await arca.readArticle(`https://sm.arca.live/b/smpeople/${articleId}`, { noCache: false, withComments: false });
+
+  bot.sendMessage({embed: {
+    color: '#ff0000',
+    title: '게시글 청소',
+    url: `https://sm.arca.live/b/smpeople/${articleId}`,
+    description: '해당 게시글의 댓글을 전부 비웁니다.',
+    fields: [{
+      name: articleData.title,
+      value: `조회수 : ${articleData.views} | 댓글 : ${articleData.commentCount}`
+    }],
+    timestamp: new Date()
+  }});
+
+  arca.cleanArticle(`https://sm.arca.live/b/smpeople/${articleId}`);
+});
+
 server.listen(settings.server.port, function() {
   console.log(`App is listening at ${settings.server.port}`);
 });
