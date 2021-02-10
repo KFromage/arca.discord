@@ -150,7 +150,7 @@ Arcalive.prototype.blockArticle = function(articleUrl, duration) {
 
 Arcalive.prototype.quarantineArticle = function(articleUrl) {
   this._session.fromUrl(articleUrl).edit({
-    category: '격리'
+    category: '운영'
   });
 }
 
