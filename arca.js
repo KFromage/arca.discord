@@ -148,8 +148,13 @@ Arcalive.prototype.blockArticle = function(articleUrl, duration) {
   this._session.fromUrl(articleUrl).blockUser(duration);
 }
 
-Arcalive.prototype.quarantineArticle = function(articleUrl) {
-  this._session.fromUrl(articleUrl).edit({
+Arcalive.prototype.quarantineArticle = async function(articleUrl) {
+  const article = this._session.fromUrl(articleUrl);
+  await article.read({
+    noCache: false,
+    withComments: false
+  });
+  article.edit({
     category: '운영'
   });
 }
