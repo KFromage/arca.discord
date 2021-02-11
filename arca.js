@@ -1,4 +1,4 @@
-const Arca = require('./lib/arcalive.js');
+const Arca = require('arcalive');
 
 function Arcalive(username, password) {
   this._session = new Arca.Session(username, password);
@@ -94,6 +94,25 @@ Arcalive.prototype._checkArticles = async function() {
             this._dispatch(deleteRule.event, [ article ]);
           }
         });
+
+        /*article.restrictCountry(
+          'GH', 'GA', 'GY', 'GM', 'GP', 'GT', 'GU', 'GD', 'GR', 'GL', 'GN', 'GW', 'NA', 'NR', 'NG', 'SS',
+          'ZA', 'NL', 'NP', 'NO', 'NF', 'NC', 'NZ', 'NU', 'NE', 'NI', 'KR', 'DK', 'DO', 'DM', 'DE', 'TL',
+          'LA', 'LR', 'LV', 'RU', 'LB', 'LS', 'RE', 'RO', 'LU', 'RW', 'LY', 'LT', 'LI', 'MG', 'MQ', 'MH',
+          'YT', 'MO', 'MW', 'MY', 'ML', 'MX', 'MC', 'MA', 'MU', 'MR', 'MZ', 'ME', 'MS', 'MD', 'MV', 'MT',
+          'MN', 'US', 'UM', 'VI', 'MM', 'FM', 'VU', 'BH', 'BB', 'VA', 'BS', 'BD', 'BM', 'BJ', 'VE', 'VN',
+          'BE', 'BY', 'BZ', 'BQ', 'BA', 'BW', 'BO', 'BI', 'BF', 'BV', 'BT', 'MP', 'MK', 'BG', 'BR', 'BN',
+          'WS', 'SA', 'GS', 'SM', 'ST', 'MF', 'BL', 'PM', 'EH', 'SN', 'RS', 'SC', 'LC', 'VC', 'KN', 'SH',
+          'SO', 'SB', 'SD', 'SR', 'LK', 'SJ', 'SE', 'CH', 'ES', 'SK', 'SI', 'SY', 'SL', 'SX', 'SG', 'AE',
+          'AW', 'AM', 'AR', 'AS', 'IS', 'HT', 'IE', 'AZ', 'AF', 'AD', 'AL', 'DZ', 'AO', 'AG', 'AI', 'ER',
+          'SZ', 'EC', 'ET', 'SV', 'GB', 'VG', 'IO', 'YE', 'AU', 'AT', 'HN', 'AX', 'WF', 'JO', 'UG', 'UY',
+          'UZ', 'UA', 'IQ', 'IR', 'IL', 'EG', 'IT', 'IN', 'ID', 'JP', 'JM', 'ZM', 'JE', 'GQ', 'KP', 'GE',
+          'CN', 'CF', 'TW', 'DJ', 'GI', 'ZW', 'TD', 'CZ', 'CL', 'CM', 'CV', 'KZ', 'QA', 'KH', 'CA', 'KE',
+          'KY', 'KM', 'CR', 'CC', 'CI', 'CO', 'CG', 'CD', 'CU', 'KW', 'CK', 'CW', 'HR', 'CX', 'KG', 'KI',
+          'CY', 'TJ', 'TZ', 'TH', 'TC', 'TR', 'TG', 'TK', 'TO', 'TM', 'TV', 'TN', 'TT', 'PA', 'PK', 'PG',
+          'PW', 'PS', 'FO', 'PE', 'PT', 'FK', 'PL', 'PR', 'FR', 'GF', 'TF', 'PF', 'FJ', 'FI', 'PH', 'PN',
+          'HU', 'HK'
+        );*/
       });
     }
 
@@ -170,12 +189,34 @@ Arcalive.prototype.cleanArticle = async function(articleUrl) {
 
 Arcalive.prototype.quarantineArticle = async function(articleUrl) {
   const article = this._session.fromUrl(articleUrl);
-  await article.read({
+  const articleData = await article.read({
     noCache: false,
     withComments: false
   });
+
+  if(articleData.category === '운영') return;
+
+  const editContent = `기존 카테고리 : ${articleData.category || '-'}<br>${articleData.content}`;
+
   article.edit({
-    category: '운영'
+    category: '운영',
+    content: editContent
+  });
+}
+
+Arcalive.prototype.releaseArticle = async function(articleUrl) {
+  const article = this._session.fromUrl(articleUrl);
+  const articleData = await article.read({
+    noCache: false,
+    withComments: false
+  });
+
+  const [ categoryString, categoryName ] = articleData.content.match(/기존 카테고리 : ([^<]*)/);
+  const editContent = articleData.content.replace(categoryString, '');
+
+  article.edit({
+    category: categoryName === '-' ? '' : categoryName,
+    content: editContent
   });
 }
 

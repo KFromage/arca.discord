@@ -60,7 +60,7 @@ arca.on('redact', function(article) {
 arca.on('quarantine', function(article) {
   bot.sendMessage({embed: {
     color: '#ff0000',
-    title: '차단어 감지',
+    title: '게시글 격리',
     url: article.url,
     description: '해당 게시글의 비추천 과다가 감지되어 격리합니다.',
     fields: [{
