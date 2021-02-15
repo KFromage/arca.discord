@@ -221,7 +221,7 @@ Arcalive.prototype.releaseArticle = async function(articleUrl) {
   });
 }
 
-Arcalive.prototype.memoArticle = function(articleUrl, content) {
+Arcalive.prototype.memoArticle = async function(articleUrl, content) {
   const articleData = await this._session.fromUrl(articleUrl).read({
     noCache: false,
     withComments: false
