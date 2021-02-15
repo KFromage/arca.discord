@@ -21,18 +21,19 @@ DiscordBot.prototype._initClient = function() {
     if(msg.content.indexOf('$channel') !== -1) {
       const newChannelId = msg.content.split(/ /)[1];
       this._channelId = newChannelId;
-      this._client.channels.fetch(this._channelId).then(channel => { this._channel = channel; });
-
-      bot.sendMessage({embed: {
-        color: '#ff0000',
-        title: '채널 이동',
-        description: '지금부터 작동 채널을 이동합니다.',
-        fields: [{
-          name: '새 채널',
-          value: `채널 ID : ${newChannelId}`
-        }],
-        timestamp: new Date()
-      }});
+      this._client.channels.fetch(this._channelId).then(channel => {
+        this._channel = channel;
+        this.sendMessage({embed: {
+          color: '#ff0000',
+          title: '채널 이동',
+          description: '지금부터 작동 채널을 이동합니다.',
+          fields: [{
+            name: '새 채널',
+            value: `채널 ID : ${newChannelId}`
+          }],
+          timestamp: new Date()
+        }});
+      });
     }
 
     if(msg.content.indexOf('$aggro') === 0) {
@@ -58,6 +59,12 @@ DiscordBot.prototype._initClient = function() {
       const cleanId = +msg.content.split(/ /)[1];
       this._dispatch('cleancomment', [ cleanId ]);
     }
+
+    if(msg.content.indexOf('$memo') === 0) {
+      const articleUrl = +msg.content.split(/ /)[1];
+      const content = msg.content.split(/ /).slice(2).join(' ');
+      this._dispatch('memo', [ articleUrl, content ]);
+    }
   });
   
   this._client.on('messageReactionAdd', (reaction, user) => {
@@ -72,7 +79,20 @@ DiscordBot.prototype._initClient = function() {
     }
   });
 
-  this._client.channels.fetch(this._channelId).then(channel => { this._channel = channel; });
+  this._client.channels.fetch(this._channelId).then(channel => {
+    this._channel = channel;
+
+    this.sendMessage({embed: {
+      color: '#0000ff',
+      title: '재기동',
+      description: '대충 재시작됨.',
+      fields: [{
+        name: '재시작 시각',
+        value: `${new Date()}`
+      }],
+      timestamp: new Date()
+    }});
+  });
 }
 
 DiscordBot.prototype._dispatch = function(msg, args) {

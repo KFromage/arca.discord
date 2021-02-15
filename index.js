@@ -183,7 +183,7 @@ bot.on('cleancomment', async function(articleId) {
   const articleData = await arca.readArticle(`https://sm.arca.live/b/smpeople/${articleId}`, { noCache: false, withComments: false });
 
   bot.sendMessage({embed: {
-    color: '#ff0000',
+    color: '#00ff00',
     title: '게시글 청소',
     url: `https://sm.arca.live/b/smpeople/${articleId}`,
     description: '해당 게시글의 댓글을 전부 비웁니다.',
@@ -197,19 +197,35 @@ bot.on('cleancomment', async function(articleId) {
   arca.cleanArticle(`https://sm.arca.live/b/smpeople/${articleId}`);
 });
 
+bot.on('memo', function(articleUrl, content) {
+  bot.sendMessage({embed: {
+    color: '#0000ff',
+    title: '메모 작성',
+    url: articleUrl,
+    description: '해당 게시글의 작성자에 대해 메모를 남깁니다.',
+    fields: [{
+      name: `메모 내용`,
+      value: content
+    }],
+    timestamp: new Date()
+  }});
+  arca.memoArticle(articleUrl, content);
+}); 
+
 server.listen(settings.server.port, function() {
   console.log(`App is listening at ${settings.server.port}`);
 });
 
 server.get('/', function(req, res) {
   res.json({
-    'status': 'running',
+    status: 'running',
     discord: {
-      'channel': bot._channel.id
+      channel: bot._channel.id
     },
     arcalive: {
-      'lastArticle': arca._lastArticleId,
-      'lastComment': arca._lastCommentId
+      autoDelete: arca._watch,
+      aggro: arca._aggroCount,
+      quarantine: arca._quarantineCount
     }
   });
 });

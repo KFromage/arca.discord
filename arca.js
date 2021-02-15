@@ -3,7 +3,7 @@ const Arca = require('arcalive');
 function Arcalive(username, password) {
   this._session = new Arca.Session(username, password);
   this._listeners = {};
-  this._autoDelete = [];
+  this._watch = [];
 
   this._aggroCount = -5;
   this._quarantineCount = -10;
@@ -11,7 +11,8 @@ function Arcalive(username, password) {
   (async function() {
     this._board = await this._session.getBoard('smpeople');
     this._board.url = new URL('https://sm.arca.live/b/smpeople');
-    this._article = await this._session.fromUrl('https://sm.arca.live/b/smpeople/20309237', this._session);
+    this._article = this._session.fromUrl('https://sm.arca.live/b/smpeople/20309237', this._session);
+    this._memoArticle = this._session.fromUrl('https://arca.live/b/smeyes/19962770');
   }.bind(this))()
   .then(() => {
     this._lastArticleId = -1;
@@ -89,9 +90,9 @@ Arcalive.prototype._checkArticles = async function() {
     if(this._lastArticleId) {
       newArticles.forEach(async (article) => {
         const data = await article.read({ noCache: false, withComments: false });
-        this._autoDelete.forEach(deleteRule => {
-          if(deleteRule.pattern.exec(data.title) || deleteRule.pattern.exec(data.content)) {
-            this._dispatch(deleteRule.event, [ article ]);
+        this._watch.forEach(rule => {
+          if(rule.pattern.exec(data.title) || rule.pattern.exec(data.content)) {
+            this._dispatch(rule.event, [ article ]);
           }
         });
 
@@ -148,15 +149,15 @@ Arcalive.prototype.watch = function(option = {
   word: '',
   event: 'delete'
 }) {
-  this._autoDelete.push(option);
+  this._watch.push(option);
 }
 
 Arcalive.prototype.cancelWatch = function(option = {
   word: '',
   event: 'delete'
 }) {
-  const index = this._autoDelete.findIndex(rule => (rule.word === option.word && rule.event === option.event));
-  this._autoDelete.splice(index, 1);
+  const index = this._watch.findIndex(rule => (rule.word === option.word && rule.event === option.event));
+  this._watch.splice(index, 1);
 }
 
 Arcalive.prototype.deleteArticle = function(articleUrl) {
@@ -218,6 +219,20 @@ Arcalive.prototype.releaseArticle = async function(articleUrl) {
     category: categoryName === '-' ? '' : categoryName,
     content: editContent
   });
+}
+
+Arcalive.prototype.memoArticle = function(articleUrl, content) {
+  const articleData = await this._session.fromUrl(articleUrl).read({
+    noCache: false,
+    withComments: false
+  });
+
+  this.memoArticle.writeComment(JSON.stringify({
+    id: articleData.author,
+    note: content,
+    link: articleUrl,
+    padding: 0
+  }));
 }
 
 module.exports = Arcalive;
