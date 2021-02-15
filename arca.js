@@ -227,6 +227,8 @@ Arcalive.prototype.memoArticle = async function(articleUrl, content) {
     withComments: false
   });
 
+  console.log(articleData);
+
   this._memoArticle.writeComment(JSON.stringify({
     id: articleData.author,
     note: content,
