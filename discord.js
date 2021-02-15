@@ -61,7 +61,7 @@ DiscordBot.prototype._initClient = function() {
     }
 
     if(msg.content.indexOf('$memo') === 0) {
-      const articleUrl = +msg.content.split(/ /)[1];
+      const articleUrl = msg.content.split(/ /)[1];
       const content = msg.content.split(/ /).slice(2).join(' ');
       this._dispatch('memo', [ articleUrl, content ]);
     }
