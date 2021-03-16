@@ -6,7 +6,7 @@ function Arcalive(username, password) {
   this._watch = [];
 
   this._aggroCount = -5;
-  this._quarantineCount = -10;
+  this._quarantineCount = -20;
 
   (async function() {
     this._board = await this._session.getBoard('smpeople');
