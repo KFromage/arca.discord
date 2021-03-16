@@ -10,8 +10,8 @@ function Arcalive(username, password) {
 
   (async function() {
     this._board = await this._session.getBoard('smpeople');
-    this._board.url = new URL('https://sm.arca.live/b/smpeople');
-    this._article = this._session.fromUrl('https://sm.arca.live/b/smpeople/20309237', this._session);
+    this._board.url = new URL('https://arca.live/b/smpeople');
+    this._article = this._session.fromUrl('https://arca.live/b/smpeople/20309237', this._session);
     this._memoArticle = this._session.fromUrl('https://arca.live/b/smeyes/19962770');
   }.bind(this))()
   .then(() => {
@@ -34,7 +34,7 @@ Arcalive.prototype._checkNoti = async function() {
     if(smNotification.length !== 0) {
       for(const i in smNotification) {
         const notification = smNotification[i];
-        await this._session._fetch('https://sm.arca.live' + notification.link);
+        await this._session._fetch('https://arca.live' + notification.link);
       }
       this._dispatch('notification', [ smNotification ]);
     }
@@ -176,7 +176,7 @@ Arcalive.prototype.cleanArticle = async function(articleUrl) {
   const article = this._session.fromUrl(articleUrl);
   const articleData = await article.read({ noCache: true, withComments: true});
 
-  Arca.FetchQueue.setRateLimit(1500);
+  Arca.FetchQueue.setRateLimit(5000);
 
   for(let i = 0; i < articleData.comments.length; i++) {
     const comment = articleData.comments[i];

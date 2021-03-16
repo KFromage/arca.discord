@@ -180,12 +180,12 @@ bot.on('strikeOut', function(banDays, embed) {
 });
 
 bot.on('cleancomment', async function(articleId) {
-  const articleData = await arca.readArticle(`https://sm.arca.live/b/smpeople/${articleId}`, { noCache: false, withComments: false });
+  const articleData = await arca.readArticle(`https://arca.live/b/smpeople/${articleId}`, { noCache: false, withComments: false });
 
   bot.sendMessage({embed: {
     color: '#00ff00',
     title: '게시글 청소',
-    url: `https://sm.arca.live/b/smpeople/${articleId}`,
+    url: `https://arca.live/b/smpeople/${articleId}`,
     description: '해당 게시글의 댓글을 전부 비웁니다.',
     fields: [{
       name: articleData.title,
@@ -194,7 +194,7 @@ bot.on('cleancomment', async function(articleId) {
     timestamp: new Date()
   }});
 
-  arca.cleanArticle(`https://sm.arca.live/b/smpeople/${articleId}`);
+  arca.cleanArticle(`https://arca.live/b/smpeople/${articleId}`);
 });
 
 bot.on('memo', function(articleUrl, content) {
