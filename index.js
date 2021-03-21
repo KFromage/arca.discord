@@ -215,7 +215,7 @@ bot.on('memo', function(articleUrl, content) {
   arca.memoArticle(articleUrl, content);
 });
 
-bot.on('accept-auth', function(token) {
+bot.on('accept-auth', function(token, explain) {
   bot.sendMessage({embed: {
     color: '#00ff00',
     title: '권한 승인',
