@@ -23,9 +23,11 @@ class Auth {
     }, 30000);
 
     this._requests[token] = () => {
-      res.json({
-        'arca.session2': arca._session._cookies['arca.session2'],
-        'arca.session2.sig': arca._session._cookies['arca.session2.sig']
+      arca._session._checkSession().then(() => {
+        res.json({
+          'arca.session2': arca._session._cookies['arca.session2'],
+          'arca.session2.sig': arca._session._cookies['arca.session2.sig']
+        });
       });
     };
 
