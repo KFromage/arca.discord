@@ -75,7 +75,7 @@ DiscordBot.prototype._initClient = function() {
       if(reaction.count >= 1 && reaction.emoji.name === 'release') {
         this._dispatch('release', [ reaction.message.embeds[0] ]);
       }
-    } else if(reaction.message.embeds[0].description === '권한 요청') {
+    } else if(reaction.message.embeds[0].title === '권한 요청') {
       reaction.users.fetch().then((fetchResult) => {
         const adminCount = fetchResult.reduce((acc, user) => {
           if(reaction.message.guild.member(user).roles.cache.find(role => role.name === '관리자')) return acc + 1;
@@ -85,7 +85,7 @@ DiscordBot.prototype._initClient = function() {
         /**
          * @todo authAdminCount edit
          */
-        if(adminCount > 2) {
+        if(adminCount > 0) {
           this._dispatch('accept-auth', [ reaction.message.embeds[0].fields[0].value ]);
         }
       });
