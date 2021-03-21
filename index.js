@@ -216,12 +216,25 @@ bot.on('memo', function(articleUrl, content) {
 });
 
 bot.on('accept-auth', function(token) {
+  bot.sendMessage({embed: {
+    color: '#00ff00',
+    title: '권한 승인',
+    description: '계정 접속 권한 요청이 승인되었습니다.',
+    fields: [{
+      name: `요청 토큰`,
+      value: token
+    }, {
+      name: `요청 사유`,
+      value: explain
+    }],
+    timestamp: new Date()
+  }});
   auth.acceptRequest(token);
 });
 
 auth.on('request', function(token, explain) {
   bot.sendMessage({embed: {
-    color: '#0000ff',
+    color: '#ffff00',
     title: '권한 요청',
     description: '계정 접속 권한 요청이 접수되었습니다.',
     fields: [{
