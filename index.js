@@ -2,9 +2,12 @@ const DiscordBot = require('./discord');
 const Arca = require('./arca');
 const settings = require('./settings');
 const express = require('express');
+const bodyParser = require('body-parser');
+
+const auth = require('./auth').initialize();
 
 const bot = new DiscordBot(settings.discord.token, settings.discord.channelId);
-const arca = new Arca(settings.arcalive.username, settings.arcalive.password);
+const arca = Arca.initialize(settings.arcalive.username, settings.arcalive.password);
 const server = express();
 
 arca.on('notification', function(notifications) {
@@ -210,13 +213,37 @@ bot.on('memo', function(articleUrl, content) {
     timestamp: new Date()
   }});
   arca.memoArticle(articleUrl, content);
-}); 
+});
+
+bot.on('accept-auth', function(token) {
+  auth.acceptRequest(token);
+});
+
+auth.on('request', function(token, explain) {
+  bot.sendMessage({embed: {
+    color: '#0000ff',
+    title: '권한 요청',
+    description: '계정 접속 권한 요청이 접수되었습니다.',
+    fields: [{
+      name: `요청 토큰`,
+      value: token
+    }, {
+      name: `요청 사유`,
+      value: explain
+    }],
+    timestamp: new Date()
+  }});
+});
 
 server.listen(settings.server.port, function() {
   console.log(`App is listening at ${settings.server.port}`);
 });
 
-server.get('/', function(req, res) {
+server.use(bodyParser.json());
+server.use(bodyParser.urlencoded({ extended: true }));
+server.use(auth.router);
+
+server.get('/status', function(req, res) {
   res.json({
     status: 'running',
     discord: {

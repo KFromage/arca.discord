@@ -71,11 +71,24 @@ DiscordBot.prototype._initClient = function() {
     if(reaction.message.author.id !== this._client.user.id) return;
     if(!reaction.message.guild.member(user).roles.cache.find(role => role.name === '관리자')) return;
 
-    if(reaction.count >= 1 && reaction.emoji.name === 'release') {
-      this._dispatch('release', [ reaction.message.embeds[0] ]);
-    }
-    if(reaction.count >= 3 && reaction.emoji.name.indexOf('ban') !== -1) {
-      this._dispatch('strikeOut', [ +reaction.emoji.name.match(/(\d+)ban/)[1], reaction.message.embeds[0] ]);
+    if(reaction.message.embeds[0].url.includes('arca.live')) {
+      if(reaction.count >= 1 && reaction.emoji.name === 'release') {
+        this._dispatch('release', [ reaction.message.embeds[0] ]);
+      }
+    } else if(reaction.message.embeds[0].description === '권한 요청') {
+      reaction.users.fetch().then((fetchResult) => {
+        const adminCount = fetchResult.reduce((acc, user) => {
+          if(reaction.message.guild.member(user).roles.cache.find(role => role.name === '관리자')) return acc + 1;
+          return acc;
+        }, 0);
+
+        /**
+         * @todo authAdminCount edit
+         */
+        if(adminCount > 2) {
+          this._dispatch('accept-auth', [ reaction.message.embeds[0].fields[0].value ]);
+        }
+      });
     }
   });
 
