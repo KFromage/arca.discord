@@ -85,7 +85,7 @@ DiscordBot.prototype._initClient = function() {
         /**
          * @todo authAdminCount edit
          */
-        if(adminCount > 0) {
+        if(adminCount > 2) {
           this._dispatch('accept-auth', [ reaction.message.embeds[0].fields[0].value, reaction.message.embeds[0].fields[1].value ]);
         }
       });
