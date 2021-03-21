@@ -11,7 +11,7 @@ class Auth {
       this.takeRequest(req, res);
     });
 
-    return this.router;
+    return this;
   }
 
   static async takeRequest(req, res) {
