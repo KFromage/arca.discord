@@ -2,6 +2,7 @@ const DiscordBot = require('./discord');
 const Arca = require('./arca');
 const settings = require('./settings');
 const express = require('express');
+const cors = require('cors');
 const bodyParser = require('body-parser');
 
 const auth = require('./auth').initialize();
@@ -252,6 +253,7 @@ server.listen(settings.server.port, function() {
   console.log(`App is listening at ${settings.server.port}`);
 });
 
+server.use(cors());
 server.use(bodyParser.json());
 server.use(bodyParser.urlencoded({ extended: true }));
 server.use(auth.router);
