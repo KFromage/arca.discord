@@ -71,7 +71,7 @@ DiscordBot.prototype._initClient = function() {
     if(reaction.message.author.id !== this._client.user.id) return;
     if(!reaction.message.guild.member(user).roles.cache.find(role => role.name === '관리자')) return;
 
-    if(reaction.message.embeds[0].url.includes('arca.live')) {
+    if(reaction.message.embeds[0].url && reaction.message.embeds[0].url.includes('arca.live')) {
       if(reaction.count >= 1 && reaction.emoji.name === 'release') {
         this._dispatch('release', [ reaction.message.embeds[0] ]);
       }
