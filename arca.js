@@ -145,8 +145,8 @@ class Arcalive {
     const now = new Date();
     const [ h, m ] = [ now.getHours(), now.getMinutes() ];
 
-    if(h === 23 && m === 51) {
-      if(!this._zeroHour) {
+    if(h === 23 && m === 53) {
+      if(!this._zeroHourFlag) {
         this._dispatch('zerohour-report', [{
           aggros: this._dailyAggros,
           quarantines: this._dailyQuarantines,
@@ -157,10 +157,10 @@ class Arcalive {
         this._dailyQuarantines = 0;
         this._dailyArticles = 0;
 
-        this._zeroHour = true;
+        this._zeroHourFlag = true;
       }
     } else {
-      this._zeroHour = false;
+      this._zeroHourFlag = false;
     }
 
     setTimeout(this._zeroHour.bind(this), 10000);
