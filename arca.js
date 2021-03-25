@@ -145,7 +145,7 @@ class Arcalive {
     const now = new Date();
     const [ h, m ] = [ now.getHours(), now.getMinutes() ];
 
-    if(h === 23 && m === 46) {
+    if(h === 23 && m === 49) {
       if(!this._zeroHour) {
         this._dispatch('zerohour-report', [{
           aggros: this._dailyAggros,
