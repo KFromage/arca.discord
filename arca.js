@@ -31,6 +31,7 @@ class Arcalive {
       this._checkNoti();
       this._checkClaim();
       this._checkArticles();
+      this._zeroHour();
     });
 
     return this;
@@ -136,6 +137,11 @@ class Arcalive {
   }
 
   static _zeroHour() {
+
+    if(!this._running) {
+      return;
+    }
+
     const now = new Date();
     const [ h, m ] = [ now.getHours(), now.getMinutes() ];
 
@@ -156,6 +162,8 @@ class Arcalive {
     } else {
       this._zeroHour = false;
     }
+
+    setTimeout(this._checkClaim.bind(this), 10000);
   }
 
   static _dispatch(msg, args) {
