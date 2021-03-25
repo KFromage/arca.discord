@@ -277,7 +277,7 @@ server.get('/status', function(req, res) {
       channel: bot._channel.id
     },
     arcalive: {
-      autoDelete: arca._watch,
+      autoDelete: arca._watch.map(_ => { return { pattern: _.pattern.toString(), event: _.event } }),
       aggro: arca._aggroCount,
       quarantine: arca._quarantineCount
     }
