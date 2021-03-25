@@ -116,6 +116,25 @@ arca.on('aggro', function(article) {
   }});
 });
 
+arca.on('zerohour-report', function(report) {
+  bot.sendMessage({embed: {
+    color: '#ff0000',
+    title: '오늘의 리포트',
+    description: '오늘의 분탕베기 활동 리포트입니다.',
+    fields: [{
+      name: '확인한 게시글 수',
+      value: `${report.articles}개`
+    }, {
+      name: '검출한 비추천 게시글 수',
+      value: `${report.aggro}개`
+    }, {
+      name: '격리한 게시글 수',
+      value: `${report.quarantine}개`
+    }],
+    timestamp: new Date()
+  }});
+});
+
 bot.on('setquarantine', function(newCount) {
   bot.sendMessage({embed: {
     color: '#ff0000',

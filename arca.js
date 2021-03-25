@@ -9,7 +9,13 @@ class Arcalive {
     this._aggroCount = -5;
     this._quarantineCount = -20;
     this._running = true;
-  
+
+    this._dailyAggros = 0;
+    this._dailyQuarantines = 0;
+    this._dailyArticles = 0;
+
+    this._zeroHour = false;
+
     (async function() {
       this._board = await this._session.getBoard('smpeople');
       this._board.url = new URL('https://arca.live/b/smpeople');
@@ -97,15 +103,18 @@ class Arcalive {
   
       newAggroArticles.forEach(aggroArticle => {
         this._checkedAggro.push(aggroArticle.articleId);
+        this._dailyAggros++;
         this._dispatch('aggro', [ aggroArticle ]);
       });
   
       newQuarantineArticles.forEach(quarantineArticle => {
         this._checkedQuarantine.push(quarantineArticle.articleId);
+        this._dailyQuarantines++;
         this._dispatch('quarantine', [ quarantineArticle ]);
       })
   
       if(this._lastArticleId) {
+        this._dailyArticles += newArticles.length;
         newArticles.forEach(async (article) => {
           const data = await article.read({ noCache: false, withComments: false });
           this._watch.forEach(rule => {
@@ -113,25 +122,6 @@ class Arcalive {
               this._dispatch(rule.event, [ article ]);
             }
           });
-  
-          /*article.restrictCountry(
-            'GH', 'GA', 'GY', 'GM', 'GP', 'GT', 'GU', 'GD', 'GR', 'GL', 'GN', 'GW', 'NA', 'NR', 'NG', 'SS',
-            'ZA', 'NL', 'NP', 'NO', 'NF', 'NC', 'NZ', 'NU', 'NE', 'NI', 'KR', 'DK', 'DO', 'DM', 'DE', 'TL',
-            'LA', 'LR', 'LV', 'RU', 'LB', 'LS', 'RE', 'RO', 'LU', 'RW', 'LY', 'LT', 'LI', 'MG', 'MQ', 'MH',
-            'YT', 'MO', 'MW', 'MY', 'ML', 'MX', 'MC', 'MA', 'MU', 'MR', 'MZ', 'ME', 'MS', 'MD', 'MV', 'MT',
-            'MN', 'US', 'UM', 'VI', 'MM', 'FM', 'VU', 'BH', 'BB', 'VA', 'BS', 'BD', 'BM', 'BJ', 'VE', 'VN',
-            'BE', 'BY', 'BZ', 'BQ', 'BA', 'BW', 'BO', 'BI', 'BF', 'BV', 'BT', 'MP', 'MK', 'BG', 'BR', 'BN',
-            'WS', 'SA', 'GS', 'SM', 'ST', 'MF', 'BL', 'PM', 'EH', 'SN', 'RS', 'SC', 'LC', 'VC', 'KN', 'SH',
-            'SO', 'SB', 'SD', 'SR', 'LK', 'SJ', 'SE', 'CH', 'ES', 'SK', 'SI', 'SY', 'SL', 'SX', 'SG', 'AE',
-            'AW', 'AM', 'AR', 'AS', 'IS', 'HT', 'IE', 'AZ', 'AF', 'AD', 'AL', 'DZ', 'AO', 'AG', 'AI', 'ER',
-            'SZ', 'EC', 'ET', 'SV', 'GB', 'VG', 'IO', 'YE', 'AU', 'AT', 'HN', 'AX', 'WF', 'JO', 'UG', 'UY',
-            'UZ', 'UA', 'IQ', 'IR', 'IL', 'EG', 'IT', 'IN', 'ID', 'JP', 'JM', 'ZM', 'JE', 'GQ', 'KP', 'GE',
-            'CN', 'CF', 'TW', 'DJ', 'GI', 'ZW', 'TD', 'CZ', 'CL', 'CM', 'CV', 'KZ', 'QA', 'KH', 'CA', 'KE',
-            'KY', 'KM', 'CR', 'CC', 'CI', 'CO', 'CG', 'CD', 'CU', 'KW', 'CK', 'CW', 'HR', 'CX', 'KG', 'KI',
-            'CY', 'TJ', 'TZ', 'TH', 'TC', 'TR', 'TG', 'TK', 'TO', 'TM', 'TV', 'TN', 'TT', 'PA', 'PK', 'PG',
-            'PW', 'PS', 'FO', 'PE', 'PT', 'FK', 'PL', 'PR', 'FR', 'GF', 'TF', 'PF', 'FJ', 'FI', 'PH', 'PN',
-            'HU', 'HK'
-          );*/
         });
       }
   
@@ -143,6 +133,27 @@ class Arcalive {
     }
   
     setTimeout(this._checkArticles.bind(this), 10000);
+  }
+
+  static _zeroHour() {
+    const now = new Date();
+    const [ h, m ] = [ now.getHours(), now.getMinutes() ];
+
+    if(h === 23 && m === 46 && !this._zeroHour) {
+      this._dispatch('zerohour-report', [{
+        aggros: this._dailyAggros,
+        quarantines: this._dailyQuarantines,
+        articles: this._dailyArticles
+      }]);
+
+      this._dailyAggros = 0;
+      this._dailyQuarantines = 0;
+      this._dailyArticles = 0;
+
+      this._zeroHour = true;
+    } else {
+      this._zeroHour = false;
+    }
   }
 
   static _dispatch(msg, args) {
