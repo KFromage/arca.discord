@@ -65,6 +65,14 @@ DiscordBot.prototype._initClient = function() {
       const content = msg.content.split(/ /).slice(2).join(' ');
       this._dispatch('memo', [ articleUrl, content ]);
     }
+
+    if(msg.content.indexOf('$reboot') === 0) {
+      this._dispatch('reboot');
+    }
+
+    if(msg.content.indexOf('$ireboot') === 0) {
+      this._dispatch('immediate-reboot');
+    }
   });
   
   this._client.on('messageReactionAdd', (reaction, user) => {
