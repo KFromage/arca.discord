@@ -11,7 +11,30 @@ const auth = require('./auth').initialize();
 
 const bot = new DiscordBot(settings.discord.token, settings.discord.channelId);
 const arca = Arca.initialize(settings.arcalive.username, settings.arcalive.password);
-const server = express();
+const expressApp = express();
+
+const server = expressApp.listen(settings.server.port, function() {
+  console.log(`App is listening at ${settings.server.port}`);
+});
+
+expressApp.use(cors());
+expressApp.use(bodyParser.json());
+expressApp.use(bodyParser.urlencoded({ extended: true }));
+expressApp.use(auth.router);
+
+expressApp.get('/status', function(req, res) {
+  res.json({
+    status: 'running',
+    discord: {
+      channel: bot._channel.id
+    },
+    arcalive: {
+      autoDelete: arca._watch.map(_ => { return { pattern: _.pattern.toString(), event: _.event } }),
+      aggro: arca._aggroCount,
+      quarantine: arca._quarantineCount
+    }
+  });
+});
 
 arca.on('notification', function(notifications) {
   notifications
@@ -259,27 +282,4 @@ auth.on('request', function(token, explain) {
     }],
     timestamp: new Date()
   }});
-});
-
-server.listen(settings.server.port, function() {
-  console.log(`App is listening at ${settings.server.port}`);
-});
-
-server.use(cors());
-server.use(bodyParser.json());
-server.use(bodyParser.urlencoded({ extended: true }));
-server.use(auth.router);
-
-server.get('/status', function(req, res) {
-  res.json({
-    status: 'running',
-    discord: {
-      channel: bot._channel.id
-    },
-    arcalive: {
-      autoDelete: arca._watch.map(_ => { return { pattern: _.pattern.toString(), event: _.event } }),
-      aggro: arca._aggroCount,
-      quarantine: arca._quarantineCount
-    }
-  });
 });
