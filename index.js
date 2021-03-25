@@ -10,7 +10,7 @@ const bodyParser = require('body-parser');
 const auth = require('./auth').initialize();
 
 const bot = new DiscordBot(settings.discord.token, settings.discord.channelId);
-const arca = Arca.initialize(settings.arcalive.username, settings.arcalive.password);
+const arca = Arca.initialize(settings.arcalive.bot.username, settings.arcalive.bot.password);
 const expressApp = express();
 
 const server = expressApp.listen(settings.server.port, function() {

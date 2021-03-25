@@ -1,5 +1,6 @@
 const express = require('express');
-const arca = require('./arca');
+const Arca = require('arcalive');
+const settings = require('./settings');
 
 class Auth {
   static initialize() {
@@ -23,10 +24,11 @@ class Auth {
     }, 30000);
 
     this._requests[token] = () => {
-      arca._session._checkSession().then(() => {
+      const newSession = new Arca.Session(settings.arcalive.admin.username, settings.arcalive.admin.password);
+      newSession._checkSession().then(() => {
         res.json({
-          'arca.session2': arca._session._cookies['arca.session2'],
-          'arca.session2.sig': arca._session._cookies['arca.session2.sig']
+          'arca.session2': newSession._cookies['arca.session2'],
+          'arca.session2.sig': newSession._cookies['arca.session2.sig']
         });
       });
     };

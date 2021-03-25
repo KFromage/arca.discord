@@ -7,8 +7,14 @@ module.exports = {
     channelId: process.env['discord_channelid']
   },
   arcalive: {
-    username: process.env['arcalive_username'],
-    password: process.env['arcalive_password']
+    admin: {
+      username: process.env['arcalive_admin_username'],
+      password: process.env['arcalive_admin_password']
+    },
+    bot: {
+      username: process.env['arcalive_username'],
+      password: process.env['arcalive_password']
+    }
   },
   server: {
     port: process.env['PORT']
