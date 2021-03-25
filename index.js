@@ -259,7 +259,7 @@ bot.on('accept-auth', function(token, explain) {
 });
 
 bot.on('reboot', function() {
-  arca._session.closeSession();
+  arca.close();
   bot._client.destroy();
   server.close();
 });

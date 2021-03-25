@@ -8,6 +8,7 @@ class Arcalive {
   
     this._aggroCount = -5;
     this._quarantineCount = -20;
+    this._running = true;
   
     (async function() {
       this._board = await this._session.getBoard('smpeople');
@@ -28,8 +29,16 @@ class Arcalive {
 
     return this;
   }
+
+  static close() {
+    this._running = false;
+    this._session.closeSession();
+  }
   
   static async _checkNoti() {
+    if(!this._running) {
+      return;
+    }
     try {
       const notifications = await this._session._fetch('https://arca.live/api/notification', { parse: false }).then(res => res.json());
       const smNotification = notifications.filter(noti => noti.link.indexOf('/b/smpeople') !== -1);
@@ -49,6 +58,9 @@ class Arcalive {
   }
 
   static async _checkClaim() {
+    if(!this._running) {
+      return;
+    }
     try {
       const claims = await this._article.read({ noCache: true, withComments: true }).then(articleData => articleData.comments);
       let currentLast = 0;
@@ -69,6 +81,9 @@ class Arcalive {
   }
 
   static async _checkArticles() {
+    if(!this._running) {
+      return;
+    }
     try {
       const articles = await this._board.readPage(1);
   
@@ -229,8 +244,6 @@ class Arcalive {
       noCache: false,
       withComments: false
     });
-  
-    console.log(articleData);
   
     this._memoArticle.writeComment(JSON.stringify({
       id: articleData.author,
