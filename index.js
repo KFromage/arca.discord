@@ -1,3 +1,5 @@
+
+const process = require('process');
 const DiscordBot = require('./discord');
 const Arca = require('./arca');
 const settings = require('./settings');
@@ -231,6 +233,16 @@ bot.on('accept-auth', function(token, explain) {
     timestamp: new Date()
   }});
   auth.acceptRequest(token);
+});
+
+bot.on('reboot', function() {
+  arca._session.closeSession();
+  bot._client.destroy();
+  server.close();
+});
+
+bot.on('immediate-reboot', function() {
+  process.exit(0);
 });
 
 auth.on('request', function(token, explain) {
