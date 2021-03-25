@@ -139,18 +139,20 @@ class Arcalive {
     const now = new Date();
     const [ h, m ] = [ now.getHours(), now.getMinutes() ];
 
-    if(h === 23 && m === 46 && !this._zeroHour) {
-      this._dispatch('zerohour-report', [{
-        aggros: this._dailyAggros,
-        quarantines: this._dailyQuarantines,
-        articles: this._dailyArticles
-      }]);
+    if(h === 23 && m === 46) {
+      if(!this._zeroHour) {
+        this._dispatch('zerohour-report', [{
+          aggros: this._dailyAggros,
+          quarantines: this._dailyQuarantines,
+          articles: this._dailyArticles
+        }]);
 
-      this._dailyAggros = 0;
-      this._dailyQuarantines = 0;
-      this._dailyArticles = 0;
+        this._dailyAggros = 0;
+        this._dailyQuarantines = 0;
+        this._dailyArticles = 0;
 
-      this._zeroHour = true;
+        this._zeroHour = true;
+      }
     } else {
       this._zeroHour = false;
     }
