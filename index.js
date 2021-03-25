@@ -126,10 +126,10 @@ arca.on('zerohour-report', function(report) {
       value: `${report.articles}개`
     }, {
       name: '검출한 비추천 게시글 수',
-      value: `${report.aggro}개`
+      value: `${report.aggros}개`
     }, {
       name: '격리한 게시글 수',
-      value: `${report.quarantine}개`
+      value: `${report.quarantines}개`
     }],
     timestamp: new Date()
   }});
