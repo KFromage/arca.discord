@@ -14,7 +14,7 @@ class Arcalive {
     this._dailyQuarantines = 0;
     this._dailyArticles = 0;
 
-    this._zeroHour = false;
+    this._zeroHourFlag = false;
 
     (async function() {
       this._board = await this._session.getBoard('smpeople');
@@ -145,7 +145,7 @@ class Arcalive {
     const now = new Date();
     const [ h, m ] = [ now.getHours(), now.getMinutes() ];
 
-    if(h === 23 && m === 53) {
+    if(h === 23 && m === 56) {
       if(!this._zeroHourFlag) {
         this._dispatch('zerohour-report', [{
           aggros: this._dailyAggros,
